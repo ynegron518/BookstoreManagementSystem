@@ -1,0 +1,15 @@
+BookstoreManagementSystem/
+├── src/
+│   └── main.cpp
+├── public/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── script.js
+│   └── index.html
+├── include/
+│   ├── httplib.h
+│   └── json.hpp
+├── README.md
+├── LICENSE
+└── .gitignore
