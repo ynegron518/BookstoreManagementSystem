@@ -1,53 +1,82 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookstore Management System</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="container">
-        <h1>Bookstore Management System</h1>
-        
+        <header>
+            <h1>📚 Bookstore Management System</h1>
+            <h3>Project by BookNooK by CTU Group 4</h3>
+            <p>Efficiently manage book inventory, orders, and listings in one platform.</p>
+        </header>
+
         <!-- Search Section -->
-        <div class="search-section">
-            <input type="text" id="searchInput" placeholder="Search books...">
-            <button onclick="searchBooks()">Search</button>
-        </div>
+        <section class="search-section card">
+            <h2>🔍 Search for Books</h2>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Enter title or author name">
+                <button onclick="searchBooks()">Search</button>
+            </div>
+            <div id="searchResults"></div>
+        </section>
 
         <!-- Order Book Section -->
-        <form class="order-form" onsubmit="placeOrder(event)">
-            <h2>Place an Order</h2>
-            <input type="text" id="orderTitle" placeholder="Book Title" required>
-            <input type="number" id="orderQuantity" placeholder="Quantity" required min="1">
-            <button type="submit">Place Order</button>
-            <p id="orderStatus"></p>
-        </form>
+        <section class="order-form card">
+            <h2>🛒 Place an Order</h2>
+            <form onsubmit="placeOrder(event)">
+                <label for="orderTitle">Book Title</label>
+                <input type="text" id="orderTitle" placeholder="Enter book title" required>
 
-        <!-- Add Book Section (Employee Only) -->
-        <form class="add-book-form" onsubmit="addBook(event)">
-            <h2>Add a New Book</h2>
-            <input type="text" id="bookTitle" placeholder="Title" required>
-            <input type="text" id="bookAuthor" placeholder="Author" required>
-            <input type="number" id="bookEdition" placeholder="Edition" required>
-            <input type="text" id="bookGenre" placeholder="Genre" required>
-            <input type="number" id="bookQuantity" placeholder="Quantity" required min="0">
-            <input type="number" id="bookPrice" placeholder="Price" step="0.01" required min="0">
-            <button type="submit">Add Book</button>
-            <p id="addBookStatus"></p>
-        </form>
+                <label for="orderQuantity">Quantity</label>
+                <input type="number" id="orderQuantity" placeholder="Enter quantity" required min="1">
+
+                <button type="submit">Place Order</button>
+                <p id="orderStatus" class="status-message"></p>
+            </form>
+        </section>
+
+        <!-- Add Book Section -->
+        <section class="add-book-form card">
+            <h2>📖 Add a New Book</h2>
+            <form onsubmit="addBook(event)">
+                <label for="bookTitle">Title</label>
+                <input type="text" id="bookTitle" placeholder="Enter book title" required>
+
+                <label for="bookAuthor">Author</label>
+                <input type="text" id="bookAuthor" placeholder="Enter author name" required>
+
+                <label for="bookEdition">Edition</label>
+                <input type="number" id="bookEdition" placeholder="Edition number" required min="1">
+
+                <label for="bookGenre">Genre</label>
+                <input type="text" id="bookGenre" placeholder="e.g., Fiction, Science" required>
+
+                <label for="bookQuantity">Quantity</label>
+                <input type="number" id="bookQuantity" placeholder="Number in stock" required min="0">
+
+                <label for="bookPrice">Price ($)</label>
+                <input type="number" id="bookPrice" placeholder="Price per unit" step="0.01" required min="0">
+
+                <button type="submit">Add Book</button>
+                <p id="addBookStatus" class="status-message"></p>
+            </form>
+        </section>
 
         <!-- Display Inventory Section -->
-        <div class="book-list">
-            <h2>Available Books</h2>
+        <section class="inventory-section card">
+            <h2>📚 Available Books</h2>
             <button onclick="loadInventory()">Load Inventory</button>
-            <div id="inventoryList"></div>
-        </div>
+            <div id="inventoryList" class="inventory-list"></div>
+        </section>
     </div>
 
     <footer>
-        <p>© 2024 Bookstore Management System. All rights reserved.</p>
+        <p>© 2024 BookNooK by CTU Group 4. All rights reserved.</p>
     </footer>
 
     <script src="script.js"></script>
