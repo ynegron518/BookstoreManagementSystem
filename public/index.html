@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,13 +10,24 @@
 <body>
     <div class="container">
         <header>
-            <h1>📚 Bookstore Management System</h1>
-            <h3>Project by BookNooK by CTU Group 4</h3>
-            <p>Efficiently manage book inventory, orders, and listings in one platform.</p>
+            <h1>📚 The BookNooK Shop</h1>
+            <h3>CTU Group 4 Project</h3>
+            <p>Everything you need to manage your bookstore—inventory, orders, and listings—in one powerful platform.</p>
+            <p>
+                <a href="#search">Search</a> | 
+                <a href="#order">Place Order</a> | 
+                <a href="#add-book">Add Book</a> | 
+                <a href="#remove-book">Remove Book</a> |
+                <a href="#wishlist">Wishlist</a> | 
+                <a href="#order-history">Order History</a> |
+                <a href="#cart">Shopping Cart</a> |
+                <a href="#inventory">Inventory</a> | 
+                <a href="#reviews">Reviews</a>
+            </p>
         </header>
 
         <!-- Search Section -->
-        <section class="search-section card">
+        <section id="search" class="search-section card">
             <h2>🔍 Search for Books</h2>
             <div class="search-bar">
                 <input type="text" id="searchInput" placeholder="Enter title or author name">
@@ -26,7 +37,7 @@
         </section>
 
         <!-- Order Book Section -->
-        <section class="order-form card">
+        <section id="order" class="order-form card">
             <h2>🛒 Place an Order</h2>
             <form onsubmit="placeOrder(event)">
                 <label for="orderTitle">Book Title</label>
@@ -41,7 +52,7 @@
         </section>
 
         <!-- Add Book Section -->
-        <section class="add-book-form card">
+        <section id="add-book" class="add-book-form card">
             <h2>📖 Add a New Book</h2>
             <form onsubmit="addBook(event)">
                 <label for="bookTitle">Title</label>
@@ -67,11 +78,68 @@
             </form>
         </section>
 
+        <!-- Remove Book Section -->
+        <section id="remove-book" class="remove-book-form card">
+            <h2>🗑️ Remove a Book</h2>
+            <form onsubmit="removeBook(event)">
+                <label for="removeBookTitle">Book Title</label>
+                <input type="text" id="removeBookTitle" placeholder="Enter book title to remove" required>
+
+                <button type="submit">Remove Book</button>
+                <p id="removeBookStatus" class="status-message"></p>
+            </form>
+        </section>
+
+        <!-- Wishlist Section -->
+        <section id="wishlist" class="wishlist-section card">
+            <h2>❤️ Wishlist</h2>
+            <form onsubmit="addToWishlist(event)">
+                <label for="wishlistTitle">Book Title</label>
+                <input type="text" id="wishlistTitle" placeholder="Enter book title" required>
+
+                <button type="submit">Add to Wishlist</button>
+                <p id="wishlistStatus" class="status-message"></p>
+            </form>
+            <div id="wishlistList" class="wishlist-list"></div>
+        </section>
+
+        <!-- Order History Section -->
+        <section id="order-history" class="order-history-section card">
+            <h2>📜 Order History</h2>
+            <button onclick="loadOrderHistory()">Load Order History</button>
+            <div id="orderHistoryList" class="order-history-list"></div>
+        </section>
+
+        <!-- Cart Section -->
+        <section id="cart" class="cart-section card">
+            <h2>🛒 Shopping Cart</h2>
+            <div id="cartItems"></div>
+            <p><strong>Total:</strong> $<span id="cartTotal">0.00</span></p>
+            <button onclick="checkout()">Checkout</button>
+            <p id="checkoutStatus" class="status-message"></p>
+        </section>
+
         <!-- Display Inventory Section -->
-        <section class="inventory-section card">
+        <section id="inventory" class="inventory-section card">
             <h2>📚 Available Books</h2>
             <button onclick="loadInventory()">Load Inventory</button>
             <div id="inventoryList" class="inventory-list"></div>
+        </section>
+
+        <!-- User Reviews Section -->
+        <section id="reviews" class="reviews-section card">
+            <h2>📢 User Reviews</h2>
+            <form onsubmit="submitReview(event)">
+                <label for="reviewTitle">Book Title</label>
+                <input type="text" id="reviewTitle" placeholder="Enter book title" required>
+                
+                <label for="reviewContent">Your Review</label>
+                <textarea id="reviewContent" placeholder="Share your thoughts" required></textarea>
+                
+                <button type="submit">Submit Review</button>
+                <p id="reviewStatus" class="status-message"></p>
+            </form>
+            <div id="reviewsList"></div>
         </section>
     </div>
 
