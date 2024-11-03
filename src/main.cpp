@@ -14,12 +14,6 @@ public:
     Book(std::string t, std::string a, int e, std::string g, int q, double p)
         : title(t), author(a), edition(e), genre(g), quantity(q), price(p) {}
 
-    void displayBook() {
-        std::cout << "Title: " << title << "\nAuthor: " << author
-            << "\nEdition: " << edition << "\nGenre: " << genre
-            << "\nQuantity: " << quantity << "\nPrice: $" << price << std::endl;
-    }
-
     std::string toStringResponse() {
         return "Title: " + title + 
                ", Author: " + author + 
@@ -110,23 +104,12 @@ public:
         inventory.push_back(newBook);
         std::cout << "Book added successfully!" << std::endl;
     }
-
-    bool updateBookQuantity(std::vector<Book>& inventory, const std::string& title, int newQuantity) {
-        for (Book& b : inventory) {
-            if (b.title == title) {
-                b.quantity = newQuantity;
-                return true;
-            }
-        }
-        return false;
-    }
 };
 
-// Enhanced InventorySystem
+// Inventory System
 class InventorySystem {
 public:
     std::vector<Book> inventory;
-    int lowStockThreshold = 5;
 
     std::string getInventoryString() {
         std::string inv;
@@ -144,56 +127,62 @@ public:
                 results += book.toStringResponse() + "\n";
             }
         }
-        return results;
-    }
-
-    std::string getLowStockAlert() {
-        std::string alerts;
-        for (const auto& book : inventory) {
-            if (book.quantity <= lowStockThreshold) {
-                alerts += "Low Stock Alert: " + book.title + 
-                         " (Quantity: " + std::to_string(book.quantity) + ")\n";
-            }
-        }
-        return alerts;
+        return results.empty() ? "No books found." : results;
     }
 };
 
-// Main function with enhanced endpoints
+// Main function
 int main() {
     InventorySystem inventorySystem;
-    AuthenticationSystem authSystem;
 
     // Sample inventory
     inventorySystem.inventory.push_back(
         Book("C++ Programming", "Bjarne Stroustrup", 4, "Programming", 10, 59.99)
     );
 
-    // Add users
-    Customer customer1("john_doe", "password123");
-    Employee employee1("admin_user", "adminpass");
-
-    authSystem.addUser(&customer1);
-    authSystem.addUser(&employee1);
-
     httplib::Server svr;
 
-    // Enhanced endpoints
+    // Display Inventory
     svr.Get("/api/inventory", [&](const httplib::Request&, httplib::Response& res) {
         res.set_content(inventorySystem.getInventoryString(), "text/plain");
     });
 
+    // Search for Books
     svr.Get("/api/search", [&](const httplib::Request& req, httplib::Response& res) {
         auto term = req.get_param_value("term");
         res.set_content(inventorySystem.searchBooks(term), "text/plain");
     });
 
-    svr.Get("/api/low-stock", [&](const httplib::Request&, httplib::Response& res) {
-        res.set_content(inventorySystem.getLowStockAlert(), "text/plain");
+    // Place Order
+    svr.Post("/api/place_order", [&](const httplib::Request& req, httplib::Response& res) {
+        std::string title = req.get_param_value("title");
+        int quantity = std::stoi(req.get_param_value("quantity"));
+
+        bool orderPlaced = false;
+        for (auto& book : inventorySystem.inventory) {
+            if (book.title == title && book.quantity >= quantity) {
+                book.quantity -= quantity;
+                orderPlaced = true;
+                break;
+            }
+        }
+
+        res.set_content(orderPlaced ? "Order placed successfully!" : "Failed to place order: Insufficient quantity or book not found.", 
+                        "text/plain");
     });
 
-    // Original endpoints remain the same
-    // ... (your existing endpoints)
+    // Add Book
+    svr.Post("/api/add_book", [&](const httplib::Request& req, httplib::Response& res) {
+        std::string title = req.get_param_value("title");
+        std::string author = req.get_param_value("author");
+        int edition = std::stoi(req.get_param_value("edition"));
+        std::string genre = req.get_param_value("genre");
+        int quantity = std::stoi(req.get_param_value("quantity"));
+        double price = std::stod(req.get_param_value("price"));
+
+        inventorySystem.inventory.emplace_back(title, author, edition, genre, quantity, price);
+        res.set_content("Book added successfully!", "text/plain");
+    });
 
     svr.listen("localhost", 8080);
     return 0;

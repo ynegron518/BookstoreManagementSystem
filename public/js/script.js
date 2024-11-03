@@ -3,8 +3,13 @@ async function loadInventory() {
     try {
         const response = await fetch('/api/inventory');
         if (!response.ok) throw new Error('Failed to load inventory');
-        
-        const books = await response.json();
+
+        const text = await response.text(); // Get the response as plain text
+        const books = text.trim().split('\n').map(line => {
+            const [title, author, edition, genre, quantity, price] = line.split('|');
+            return { title, author, edition, genre, quantity, price };
+        });
+
         const inventoryList = document.getElementById("inventoryList");
         inventoryList.innerHTML = books.map(book => `
             <div class="book-item">
@@ -13,9 +18,7 @@ async function loadInventory() {
                 <p><strong>Edition:</strong> ${book.edition}</p>
                 <p><strong>Genre:</strong> ${book.genre}</p>
                 <p><strong>Quantity:</strong> ${book.quantity}</p>
-                <p><strong>Price:</strong> $${book.price.toFixed(2)}</p>
-                <button onclick="editBook(${book.id})" class="edit-btn">Edit</button>
-                <button onclick="deleteBook(${book.id})" class="delete-btn">Delete</button>
+                <p><strong>Price:</strong> $${parseFloat(book.price).toFixed(2)}</p>
             </div>
         `).join('');
     } catch (error) {
@@ -30,8 +33,9 @@ async function searchBooks() {
     try {
         const response = await fetch(`/api/search?term=${encodeURIComponent(searchTerm)}`);
         if (!response.ok) throw new Error('Search failed');
-        const books = await response.json();
-        loadInventory(); // Refresh with search results
+        
+        const text = await response.text(); // Use plain text
+        document.getElementById("inventoryList").innerHTML = text || '<p class="error">No results found</p>';
     } catch (error) {
         console.error('Search error:', error);
     }
@@ -46,8 +50,8 @@ async function placeOrder(event) {
     try {
         const response = await fetch('/api/place_order', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, quantity })
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ title, quantity })
         });
         
         const statusElement = document.getElementById("orderStatus");
@@ -79,8 +83,8 @@ async function addBook(event) {
     try {
         const response = await fetch('/api/add_book', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bookData)
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(bookData)
         });
         
         const statusElement = document.getElementById("addBookStatus");
