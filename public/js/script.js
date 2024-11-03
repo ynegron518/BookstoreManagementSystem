@@ -1,24 +1,83 @@
+let cart = [];
+
+// Add to Cart
+function addToCart(title, price, quantity = 1) {
+    const itemIndex = cart.findIndex(item => item.title === title);
+    if (itemIndex !== -1) {
+        cart[itemIndex].quantity += quantity;
+    } else {
+        cart.push({ title, price, quantity });
+    }
+    updateCartDisplay();
+}
+
+// Update Cart Display
+function updateCartDisplay() {
+    const cartItemsDiv = document.getElementById("cartItems");
+    const cartTotalSpan = document.getElementById("cartTotal");
+    cartItemsDiv.innerHTML = "";
+
+    let total = 0;
+    cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("cart-item");
+        itemDiv.innerHTML = `
+            <p><strong>${item.title}</strong></p>
+            <p>Price: $${item.price.toFixed(2)}</p>
+            <p>Quantity: 
+                <button onclick="updateQuantity(${index}, -1)">-</button>
+                ${item.quantity}
+                <button onclick="updateQuantity(${index}, 1)">+</button>
+            </p>
+            <p>Total: $${itemTotal.toFixed(2)}</p>
+            <button onclick="removeFromCart(${index})">Remove</button>
+        `;
+        cartItemsDiv.appendChild(itemDiv);
+    });
+
+    cartTotalSpan.innerText = total.toFixed(2);
+}
+
+// Update Item Quantity in Cart
+function updateQuantity(index, change) {
+    cart[index].quantity += change;
+    if (cart[index].quantity <= 0) {
+        cart.splice(index, 1);
+    }
+    updateCartDisplay();
+}
+
+// Remove Item from Cart
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartDisplay();
+}
+
+// Checkout
+function checkout() {
+    if (cart.length === 0) {
+        document.getElementById("checkoutStatus").innerText = "Cart is empty!";
+        document.getElementById("checkoutStatus").className = "error";
+        return;
+    }
+    
+    cart = [];
+    updateCartDisplay();
+    document.getElementById("checkoutStatus").innerText = "Thank you for your purchase!";
+    document.getElementById("checkoutStatus").className = "success";
+}
+
 // Load inventory
 async function loadInventory() {
     try {
-        const response = await fetch('/inventory');  // Adjusted to match new endpoint
-        if (!response.ok) throw new Error('Failed to load inventory');
-
-        const books = await response.json(); // Parse JSON response
-        const inventoryList = document.getElementById("inventoryList");
-        inventoryList.innerHTML = books.map(book => `
-            <div class="book-item">
-                <p><strong>Title:</strong> ${book.title}</p>
-                <p><strong>Author:</strong> ${book.author}</p>
-                <p><strong>Edition:</strong> ${book.edition}</p>
-                <p><strong>Genre:</strong> ${book.genre}</p>
-                <p><strong>Quantity:</strong> ${book.quantity}</p>
-                <p><strong>Price:</strong> $${parseFloat(book.price).toFixed(2)}</p>
-            </div>
-        `).join('');
+        const response = await fetch('/api/inventory');
+        const text = await response.text();
+        document.getElementById("inventoryList").innerHTML = text || '<p class="error">No inventory available.</p>';
     } catch (error) {
         console.error('Error loading inventory:', error);
-        document.getElementById("inventoryList").innerHTML = '<p class="error">Failed to load inventory</p>';
     }
 }
 
@@ -26,23 +85,9 @@ async function loadInventory() {
 async function searchBooks() {
     const searchTerm = document.getElementById("searchInput").value.trim();
     try {
-        const response = await fetch(`/search?term=${encodeURIComponent(searchTerm)}`);  // Adjusted endpoint
-        if (!response.ok) throw new Error('Search failed');
-        
-        const books = await response.json(); // Parse JSON response
-        const inventoryList = document.getElementById("inventoryList");
-        inventoryList.innerHTML = books.length > 0
-            ? books.map(book => `
-                <div class="book-item">
-                    <p><strong>Title:</strong> ${book.title}</p>
-                    <p><strong>Author:</strong> ${book.author}</p>
-                    <p><strong>Edition:</strong> ${book.edition}</p>
-                    <p><strong>Genre:</strong> ${book.genre}</p>
-                    <p><strong>Quantity:</strong> ${book.quantity}</p>
-                    <p><strong>Price:</strong> $${parseFloat(book.price).toFixed(2)}</p>
-                </div>
-              `).join('')
-            : '<p class="error">No results found</p>';
+        const response = await fetch(`/api/search?term=${encodeURIComponent(searchTerm)}`);
+        const text = await response.text();
+        document.getElementById("searchResults").innerHTML = text || '<p class="error">No results found</p>';
     } catch (error) {
         console.error('Search error:', error);
     }
@@ -52,61 +97,35 @@ async function searchBooks() {
 async function placeOrder(event) {
     event.preventDefault();
     const title = document.getElementById("orderTitle").value;
-    const quantity = document.getElementById("orderQuantity").value;
+    const quantity = parseInt(document.getElementById("orderQuantity").value);
     
-    try {
-        const response = await fetch('/place_order', { // Adjusted endpoint
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, quantity }) // Send data as JSON
-        });
-        
-        const result = await response.json(); // Parse JSON response
-        const statusElement = document.getElementById("orderStatus");
-        statusElement.innerText = result.message;
-        statusElement.className = result.status === "success" ? 'success' : 'error';
-        
-        if (response.ok) {
-            loadInventory(); // Refresh inventory after successful order
-            event.target.reset();
-        }
-    } catch (error) {
-        console.error('Order error:', error);
-        document.getElementById("orderStatus").innerText = 'Failed to place order';
-    }
+    addToCart(title, 0, quantity); // Use 0 as price placeholder
+    document.getElementById("orderStatus").innerText = "Book added to cart.";
 }
 
-// Add a new book
-async function addBook(event) {
+// Add a new book to wishlist
+async function addToWishlist(event) {
     event.preventDefault();
-    const bookData = {
-        title: document.getElementById("bookTitle").value,
-        author: document.getElementById("bookAuthor").value,
-        edition: parseInt(document.getElementById("bookEdition").value),
-        genre: document.getElementById("bookGenre").value,
-        quantity: parseInt(document.getElementById("bookQuantity").value),
-        price: parseFloat(document.getElementById("bookPrice").value)
-    };
+    const title = document.getElementById("wishlistTitle").value;
+    document.getElementById("wishlistList").innerHTML += `<p>${title} added to wishlist.</p>`;
+}
 
+// Load Order History
+async function loadOrderHistory() {
     try {
-        const response = await fetch('/add_book', { // Adjusted endpoint
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(bookData) // Send data as JSON
-        });
-        
-        const result = await response.json(); // Parse JSON response
-        const statusElement = document.getElementById("addBookStatus");
-        statusElement.innerText = result.message;
-        statusElement.className = result.status === "success" ? 'success' : 'error';
-        
-        if (response.ok) {
-            loadInventory(); // Refresh inventory after adding a book
-            event.target.reset();
-        }
+        const response = await fetch('/api/order_history');
+        const text = await response.text();
+        document.getElementById("orderHistoryList").innerHTML = text;
     } catch (error) {
-        console.error('Add book error:', error);
-        document.getElementById("addBookStatus").innerText = 'Failed to add book';
+        console.error('Order history load error:', error);
     }
 }
 
+// Submit Review
+function submitReview(event) {
+    event.preventDefault();
+    const title = document.getElementById("reviewTitle").value;
+    const content = document.getElementById("reviewContent").value;
+    document.getElementById("reviewsList").innerHTML += `<p><strong>${title}</strong>: ${content}</p>`;
+    document.getElementById("reviewStatus").innerText = "Review submitted.";
+}
