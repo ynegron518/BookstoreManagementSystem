@@ -1,93 +1,94 @@
 /* General Layout */
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    line-height: 1.6;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background-color: #e6f2ff; /* Light blue background */
 }
 
 .container {
     max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
+    margin: 40px auto;
+    padding: 30px;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Center all text and elements inside sections */
 }
 
-/* Header Styling */
+/* Header Styles */
 header {
-    text-align: center;
     margin-bottom: 20px;
 }
 
 header h1 {
     color: #2c3e50;
-    font-size: 2.2em;
-    margin-bottom: 5px;
+    font-size: 2.5em;
+    margin-bottom: 10px;
 }
 
 header h3 {
     font-size: 1.2em;
     color: #555;
-    font-weight: normal;
-    margin-top: -10px;
+    margin-bottom: 10px;
 }
 
 header p {
     color: #666;
-    font-size: 1.1em;
-    margin-top: 5px;
+    font-size: 1em;
 }
 
-/* Card Styling for Sections */
+/* Section and Form Styling */
 .card {
     background-color: #f9f9f9;
     border-radius: 8px;
-    padding: 20px;
+    padding: 25px;
     margin-bottom: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Form and Input Styling */
 form {
     display: flex;
     flex-direction: column;
+    align-items: center; /* Center form fields */
 }
 
 label {
     font-weight: bold;
     margin-top: 10px;
+    text-align: left;
+    width: 100%;
+    max-width: 300px;
 }
 
-input {
+input, textarea, select {
     padding: 10px;
     margin-top: 5px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1em;
+    max-width: 300px; /* Set max-width for input fields */
+    width: 100%;
 }
 
+/* Button Styles */
 button {
-    padding: 12px;
+    padding: 12px 24px;
     background-color: #3498db;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
+    transition: background-color 0.3s;
     font-size: 1em;
-    font-weight: bold;
 }
 
 button:hover {
     background-color: #2980b9;
-    transform: scale(1.05);
 }
 
-/* Status Message Styling */
+/* Status Message Styles */
 .status-message {
     margin-top: 10px;
     font-size: 1em;
@@ -103,45 +104,67 @@ button:hover {
     font-weight: bold;
 }
 
-/* Inventory List */
-.inventory-list {
+/* Inventory List Styling */
+.inventory-list, .wishlist-list, .order-history-list {
     margin-top: 20px;
+    text-align: left;
 }
 
-.book-item {
+.book-item, .wishlist-item, .order-history-item {
     padding: 15px;
     border: 1px solid #eee;
     margin-bottom: 10px;
     border-radius: 4px;
     transition: transform 0.2s;
+    text-align: left;
+    max-width: 300px;
+    margin: 10px auto; /* Center each item */
 }
 
-.book-item:hover {
-    transform: translateX(5px);
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+.book-item:hover, .wishlist-item:hover, .order-history-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Footer Styling */
+/* Cart Section Styling */
+.cart-section {
+    text-align: left;
+}
+
+.cart-item {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.cart-item button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.cart-item button:hover {
+    background-color: #c0392b;
+}
+
+#cartItems p {
+    margin: 5px 0;
+}
+
+/* Footer Styles */
 footer {
     text-align: center;
-    padding: 15px;
+    padding: 20px;
     color: #888;
     font-size: 0.9em;
     border-top: 1px solid #eee;
-}
-
-/* Media Query for Mobile View */
-@media (max-width: 600px) {
-    .search-section {
-        flex-direction: column;
-    }
-
-    input, button {
-        width: 100%;
-    }
-}
-
-input:focus, button:focus {
-    outline: 2px solid #3498db;
-    outline-offset: 2px;
+    margin-top: 30px;
 }
