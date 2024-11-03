@@ -1,94 +1,33 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Build directories
-build/
-out/
-cmake-build-*/
-Debug/
-Release/
-x64/
-x86/
-
-# IDE specific files
-.vscode/
-.idea/
-*.swp
-*.swo
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-*.userprefs
-
-# OS specific files
+# Ignore OS-specific files
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Dependencies
-vcpkg_installed/
-packages/
+# Ignore compiled object files and executable
+*.o
+*.exe
+
+# Ignore build and dependency folders
+/build/
+bin/
 node_modules/
-vendor/
 
-# Environment and config files
-.env
-.env.local
-.env.development
-.env.test
-.env.production
-config.local.json
-*.config
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Logs
+# Ignore logs and temporary files
 *.log
-logs/
-npm-debug.log*
+*.tmp
+*.bak
 
-# Testing
-coverage/
-.nyc_output/
+# Ignore editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
 
-# Distribution
-dist/
+# Ignore C++ backup files
+*~
+
+# Ignore private configuration files
+.env
+
+# Ignore specific project files
+BookstoreManagementSystem/.env
+BookstoreManagementSystem/config/
