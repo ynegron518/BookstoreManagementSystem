@@ -1,15 +1,10 @@
 // Load inventory
 async function loadInventory() {
     try {
-        const response = await fetch('/api/inventory');
+        const response = await fetch('/inventory');  // Adjusted to match new endpoint
         if (!response.ok) throw new Error('Failed to load inventory');
 
-        const text = await response.text(); // Get the response as plain text
-        const books = text.trim().split('\n').map(line => {
-            const [title, author, edition, genre, quantity, price] = line.split('|');
-            return { title, author, edition, genre, quantity, price };
-        });
-
+        const books = await response.json(); // Parse JSON response
         const inventoryList = document.getElementById("inventoryList");
         inventoryList.innerHTML = books.map(book => `
             <div class="book-item">
@@ -31,11 +26,23 @@ async function loadInventory() {
 async function searchBooks() {
     const searchTerm = document.getElementById("searchInput").value.trim();
     try {
-        const response = await fetch(`/api/search?term=${encodeURIComponent(searchTerm)}`);
+        const response = await fetch(`/search?term=${encodeURIComponent(searchTerm)}`);  // Adjusted endpoint
         if (!response.ok) throw new Error('Search failed');
         
-        const text = await response.text(); // Use plain text
-        document.getElementById("inventoryList").innerHTML = text || '<p class="error">No results found</p>';
+        const books = await response.json(); // Parse JSON response
+        const inventoryList = document.getElementById("inventoryList");
+        inventoryList.innerHTML = books.length > 0
+            ? books.map(book => `
+                <div class="book-item">
+                    <p><strong>Title:</strong> ${book.title}</p>
+                    <p><strong>Author:</strong> ${book.author}</p>
+                    <p><strong>Edition:</strong> ${book.edition}</p>
+                    <p><strong>Genre:</strong> ${book.genre}</p>
+                    <p><strong>Quantity:</strong> ${book.quantity}</p>
+                    <p><strong>Price:</strong> $${parseFloat(book.price).toFixed(2)}</p>
+                </div>
+              `).join('')
+            : '<p class="error">No results found</p>';
     } catch (error) {
         console.error('Search error:', error);
     }
@@ -48,15 +55,16 @@ async function placeOrder(event) {
     const quantity = document.getElementById("orderQuantity").value;
     
     try {
-        const response = await fetch('/api/place_order', {
+        const response = await fetch('/place_order', { // Adjusted endpoint
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ title, quantity })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, quantity }) // Send data as JSON
         });
         
+        const result = await response.json(); // Parse JSON response
         const statusElement = document.getElementById("orderStatus");
-        statusElement.innerText = await response.text();
-        statusElement.className = response.ok ? 'success' : 'error';
+        statusElement.innerText = result.message;
+        statusElement.className = result.status === "success" ? 'success' : 'error';
         
         if (response.ok) {
             loadInventory(); // Refresh inventory after successful order
@@ -81,18 +89,19 @@ async function addBook(event) {
     };
 
     try {
-        const response = await fetch('/api/add_book', {
+        const response = await fetch('/add_book', { // Adjusted endpoint
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams(bookData)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bookData) // Send data as JSON
         });
         
+        const result = await response.json(); // Parse JSON response
         const statusElement = document.getElementById("addBookStatus");
-        statusElement.innerText = await response.text();
-        statusElement.className = response.ok ? 'success' : 'error';
+        statusElement.innerText = result.message;
+        statusElement.className = result.status === "success" ? 'success' : 'error';
         
         if (response.ok) {
-            loadInventory();
+            loadInventory(); // Refresh inventory after adding a book
             event.target.reset();
         }
     } catch (error) {
@@ -100,3 +109,4 @@ async function addBook(event) {
         document.getElementById("addBookStatus").innerText = 'Failed to add book';
     }
 }
+
