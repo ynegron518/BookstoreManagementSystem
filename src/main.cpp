@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <iomanip>     // For std::setprecision
+#include <sstream>     // For std::ostringstream
 #include "httplib.h"
 
 // Book class with enhanced features
@@ -14,104 +16,24 @@ public:
     Book(std::string t, std::string a, int e, std::string g, int q, double p)
         : title(t), author(a), edition(e), genre(g), quantity(q), price(p) {}
 
-    std::string toStringResponse() {
-        return "Title: " + title + 
-               ", Author: " + author + 
-               ", Edition: " + std::to_string(edition) + 
-               ", Genre: " + genre + 
-               ", Quantity: " + std::to_string(quantity) + 
-               ", Price: $" + std::to_string(price);
+    std::string toStringResponse() const {
+        std::ostringstream oss;
+        oss << "Title: " << title
+            << ", Author: " << author
+            << ", Edition: " << edition
+            << ", Genre: " << genre
+            << ", Quantity: " << quantity
+            << ", Price: $" << std::fixed << std::setprecision(2) << price;
+        return oss.str();
     }
 };
 
-// Transaction class for order tracking
-class Transaction {
-public:
-    std::string userId;
-    std::string bookTitle;
-    int quantity;
-    double amount;
-    std::string status;
-
-    Transaction(std::string uid, std::string title, int qty, double amt)
-        : userId(uid), bookTitle(title), quantity(qty), amount(amt), status("Pending") {}
-};
-
-// Enhanced User class
-class User {
-protected:
-    std::string username;
-    std::string password;
-    std::string role;
-    std::vector<Transaction> transactions;
-
-public:
-    User(std::string u, std::string p, std::string r) : username(u), password(p), role(r) {}
-    virtual bool login(std::string u, std::string p) = 0;
-    std::string getRole() { return role; }
-    std::string getUsername() { return username; }
-    
-    void addTransaction(const Transaction& t) {
-        transactions.push_back(t);
-    }
-
-    std::string getTransactionHistory() {
-        std::string history;
-        for (const auto& t : transactions) {
-            history += "Book: " + t.bookTitle + 
-                      ", Quantity: " + std::to_string(t.quantity) + 
-                      ", Amount: $" + std::to_string(t.amount) + 
-                      ", Status: " + t.status + "\n";
-        }
-        return history;
-    }
-};
-
-// Enhanced Customer class
-class Customer : public User {
-public:
-    Customer(std::string u, std::string p) : User(u, p, "customer") {}
-
-    bool login(std::string u, std::string p) override {
-        return username == u && password == p;
-    }
-
-    bool placeOrder(std::vector<Book>& inventory, const std::string& searchTitle, int quantity) {
-        for (Book& b : inventory) {
-            if (b.title == searchTitle && b.quantity >= quantity) {
-                b.quantity -= quantity;
-                Transaction t(username, searchTitle, quantity, b.price * quantity);
-                addTransaction(t);
-                return true;
-            }
-        }
-        return false;
-    }
-};
-
-// Enhanced Employee class
-class Employee : public User {
-public:
-    Employee(std::string u, std::string p) : User(u, p, "employee") {}
-
-    bool login(std::string u, std::string p) override {
-        return username == u && password == p;
-    }
-
-    void addBook(std::vector<Book>& inventory, const std::string& title, const std::string& author, 
-                int edition, const std::string& genre, int quantity, double price) {
-        Book newBook(title, author, edition, genre, quantity, price);
-        inventory.push_back(newBook);
-        std::cout << "Book added successfully!" << std::endl;
-    }
-};
-
-// Inventory System
+// Inventory System class
 class InventorySystem {
 public:
     std::vector<Book> inventory;
 
-    std::string getInventoryString() {
+    std::string getInventoryString() const {
         std::string inv;
         for (const auto& book : inventory) {
             inv += book.toStringResponse() + "\n";
@@ -119,11 +41,10 @@ public:
         return inv;
     }
 
-    std::string searchBooks(const std::string& term) {
+    std::string searchBooks(const std::string& term) const {
         std::string results;
         for (const auto& book : inventory) {
-            if (book.title.find(term) != std::string::npos || 
-                book.author.find(term) != std::string::npos) {
+            if (book.title.find(term) != std::string::npos || book.author.find(term) != std::string::npos) {
                 results += book.toStringResponse() + "\n";
             }
         }
@@ -131,30 +52,33 @@ public:
     }
 };
 
-// Main function
+// Main function with server setup
 int main() {
     InventorySystem inventorySystem;
 
-    // Sample inventory
+    // Sample inventory for demonstration
     inventorySystem.inventory.push_back(
         Book("C++ Programming", "Bjarne Stroustrup", 4, "Programming", 10, 59.99)
+    );
+    inventorySystem.inventory.push_back(
+        Book("Data Structures", "Mark Allen Weiss", 3, "Computer Science", 5, 49.99)
     );
 
     httplib::Server svr;
 
-    // Display Inventory
-    svr.Get("/api/inventory", [&](const httplib::Request&, httplib::Response& res) {
+    // Endpoint to display the full inventory (now accessible at /inventory)
+    svr.Get("/inventory", [&](const httplib::Request&, httplib::Response& res) {
         res.set_content(inventorySystem.getInventoryString(), "text/plain");
     });
 
-    // Search for Books
-    svr.Get("/api/search", [&](const httplib::Request& req, httplib::Response& res) {
+    // Endpoint to search for books by title or author (now accessible at /search)
+    svr.Get("/search", [&](const httplib::Request& req, httplib::Response& res) {
         auto term = req.get_param_value("term");
         res.set_content(inventorySystem.searchBooks(term), "text/plain");
     });
 
-    // Place Order
-    svr.Post("/api/place_order", [&](const httplib::Request& req, httplib::Response& res) {
+    // Place an order for a book (now accessible at /place_order)
+    svr.Post("/place_order", [&](const httplib::Request& req, httplib::Response& res) {
         std::string title = req.get_param_value("title");
         int quantity = std::stoi(req.get_param_value("quantity"));
 
@@ -171,8 +95,8 @@ int main() {
                         "text/plain");
     });
 
-    // Add Book
-    svr.Post("/api/add_book", [&](const httplib::Request& req, httplib::Response& res) {
+    // Add a new book to the inventory (now accessible at /add_book)
+    svr.Post("/add_book", [&](const httplib::Request& req, httplib::Response& res) {
         std::string title = req.get_param_value("title");
         std::string author = req.get_param_value("author");
         int edition = std::stoi(req.get_param_value("edition"));
@@ -184,6 +108,16 @@ int main() {
         res.set_content("Book added successfully!", "text/plain");
     });
 
-    svr.listen("localhost", 8080);
+    // Debug message to confirm server is about to start
+    std::cout << "Starting server on http://127.0.0.1:3000..." << std::endl;
+
+    // Start the server and check for errors
+    if (!svr.listen("127.0.0.1", 3000)) {
+        std::cerr << "Error: Server failed to start!" << std::endl;
+        return -1;
+    }
+
     return 0;
 }
+
+
